@@ -29,19 +29,176 @@ const BASE_URL = 'https://us1.locationiq.com/v1/search';
 // the Great Wall of China. We'll use this to form the basis of our
 // solutions.
 
-axios
-  .get(BASE_URL, {
-    params: {
-      key: API_KEY,
-      q: placeName,
-      format: 'json',
-    },
+const places = [
+  'Great Wall of China',
+  'Petra',
+  'Colosseum',
+  'Chichen Itza',
+  'Machu Picchu',
+  'Taj Mahal',
+  'Christ the Redeemer',
+];
+
+
+// Make it as a function
+// input: placeName: string
+// returns: Promise <location{}>
+const getLatLongForPlace = (placeName) => {
+  return (axios
+    .get(BASE_URL, {
+      params: {
+        key: API_KEY,
+        q: placeName,
+        format: 'json',
+      },
+    })
+    .then(response => {
+      const { lat, lon } = response.data[0];
+      // console.log({ lat, lon });
+      // return;  // as configured, eslint requires a return statement
+      return {lat, lon};
+    })
+    .catch(error => {
+      console.log(error);
+    }));
+};
+
+// getLatLongForPlace('placeName'); // { lat: '61.2089599', lon: '-149.7313413' }
+
+// { lat: '61.2089599', lon: '-149.7313413' }
+// { input: undefined }
+// need to change to return {lat, lon} to get ride of undefined
+getLatLongForPlace('placeName')
+  .then((input) => {
+    console.log({input});
+    return;
   })
-  .then(response => {
-    const { lat, lon } = response.data[0];
-    console.log({ lat, lon });
-    return;  // as configured, eslint requires a return statement
-  })
-  .catch(error => {
-    console.log(error);
+  .catch(() => {});
+
+// // Python old code
+// // code run 5000 secondes later
+
+// Method 1
+// setTimeout(() => {
+//   console.log('bzzt!');
+// }, 5000);
+
+// Method 2
+const wait = (ms) => {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms);
   });
+};
+
+wait(5000)
+  .then(() => {
+    console.log('promise');
+    return;
+  })
+  .catch(()=> {});
+
+
+// input: places, string[]
+// returns: Promise <result>
+// const getLatLonForPlaces = (places) => {
+//   const result = {};
+
+//   for (const place of places) {
+//     // call api with wonder
+//     const loc = getLatLongForPlace(place);
+
+//     // add result to final structure
+//     result[place] = loc;
+
+//     // sleep(500)
+//     wait(500);
+//   }
+//   return result;
+// };
+
+// //########################### Method 1 Promise Chain
+// const getLatLonForPlaces = (places) => {
+//   const result = {};
+
+//   // Promise.resolve() returns a Promise object that is already resolved with the value undefined.
+//   // Start a Promise chain.
+//   // Ensure that a piece of code runs asynchronously.  
+//   let promise = Promise.resolve();
+
+//   for (const place of places) {
+//     // call api with wonder
+//     promise = promise
+//       .then(() => {
+//         return getLatLongForPlace(place);
+//       })
+//       .then(loc => {
+//         // add result to final structure
+//         result[place] = loc;
+//         return;
+//       })
+//       .then(() => wait(500));
+//   }
+//   // it returns a Promise that resolves to result once all prior .then() steps have completed.
+//   return promise.then(() => {
+//     return result;
+//   });
+// };
+
+
+// getLatLonForPlaces(places)
+//   .then((result) => {
+//     console.log({result});
+//     return;
+//   })
+//   .catch(() =>{});
+// // {
+// //   result: {
+// //     'Great Wall of China': { lat: '40.3622879', lon: '116.0170592' },
+// //     Petra: { lat: '30.3258363', lon: '35.4745669' },
+// //     Colosseum: { lat: '41.8909705', lon: '12.4922415' },
+// //     'Chichen Itza': { lat: '34.4085274', lon: '-118.4282402' },
+// //     'Machu Picchu': { lat: '-13.164421950000001', lon: '-72.54508510173372' },
+// //     'Taj Mahal': { lat: '27.1750075', lon: '78.04210126365584' },
+// //     'Christ the Redeemer': { lat: '-22.9519173', lon: '-43.2104585' }
+// //   }
+// // }
+
+// //########################### End Method 1 Promise Chain
+
+
+// //########################### Method 2 async function
+const getLatLonForPlaces = async (places) => {
+  const result = {};
+
+  for (const place of places) {
+    // call api with wonder
+    const loc = await getLatLongForPlace(place);
+    result[place] = loc;
+    await wait(500);
+  }
+
+  return result;
+  ;
+};
+
+
+getLatLonForPlaces(places)
+  .then((result) => {
+    console.log({result});
+    return;
+  })
+  .catch(() =>{});
+
+
+//   {
+//   result: {
+//     'Great Wall of China': { lat: '40.3622879', lon: '116.0170592' },
+//     Petra: { lat: '30.3258363', lon: '35.4745669' },
+//     Colosseum: { lat: '41.8909705', lon: '12.4922415' },
+//     'Chichen Itza': { lat: '34.4085274', lon: '-118.4282402' },
+//     'Machu Picchu': { lat: '-13.164421950000001', lon: '-72.54508510173372' },
+//     'Taj Mahal': { lat: '27.1750075', lon: '78.04210126365584' },
+//     'Christ the Redeemer': { lat: '-22.9519173', lon: '-43.2104585' }
+//   }
+// }
+// promise
